@@ -1,51 +1,93 @@
-import React from 'react'
-import { useLocation } from 'react-router-dom'
+// src/components/AppBreadcrumb.js
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilHome } from '@coreui/icons';
 
-import routes from '../routes'
-
-import { CBreadcrumb, CBreadcrumbItem } from '@coreui/react'
+// Import your sidebar routes
+import routes from '../routes'; // or wherever your full routes are defined
 
 const AppBreadcrumb = () => {
-  const currentLocation = useLocation().pathname
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  const getRouteName = (pathname, routes) => {
-    const currentRoute = routes.find((route) => route.path === pathname)
-    return currentRoute ? currentRoute.name : false
+  // Helper: Find route name by path (supports exact match + dynamic :id segments)
+  const getRouteName = (pathname) => {
+    // First try exact match
+    let route = routes.find(r => r.path === pathname);
+    if (route?.name) return route.name;
+
+    // Fallback: match dynamic routes (e.g. /patient/:id → Patients Management > Profile)
+    if (pathname.startsWith('/patient/') && pathname !== '/patients') {
+      const id = pathname.split('/patient/')[1];
+      if (id) return `Patient Profile (ID: ${id})`;
+    }
+
+    if (pathname.startsWith('/appointments/')) {
+      return 'Appointment Details';
+    }
+
+    // Generic fallback
+    return pathname.split('/').pop() || 'Dashboard';
+  };
+
+  // Generate breadcrumb items
+  const getBreadcrumbs = () => {
+    const pathSegments = currentPath.split('/').filter(segment => segment);
+    const breadcrumbs = [];
+
+    let accumulatedPath = '';
+
+    pathSegments.forEach((segment, index) => {
+      accumulatedPath += `/${segment}`;
+      const name = getRouteName(accumulatedPath);
+
+      // Skip if name is empty or numeric-only (e.g. :id)
+      if (!name || /^\d+$/.test(segment)) return;
+
+      breadcrumbs.push({
+        pathname: accumulatedPath,
+        name,
+        active: index === pathSegments.length - 1,
+      });
+    });
+
+    return breadcrumbs;
+  };
+
+  const breadcrumbs = getBreadcrumbs();
+
+  // If we're on root or dashboard, show minimal breadcrumb
+  if (currentPath === '/' || currentPath === '/dashboard') {
+    return (
+      <CBreadcrumb className="my-0">
+        <CBreadcrumbItem active>
+          <CIcon icon={cilHome} className="me-1" />
+          Dashboard
+        </CBreadcrumbItem>
+      </CBreadcrumb>
+    );
   }
-
-  const getBreadcrumbs = (location) => {
-    const breadcrumbs = []
-    location.split('/').reduce((prev, curr, index, array) => {
-      const currentPathname = `${prev}/${curr}`
-      const routeName = getRouteName(currentPathname, routes)
-      routeName &&
-        breadcrumbs.push({
-          pathname: currentPathname,
-          name: routeName,
-          active: index + 1 === array.length ? true : false,
-        })
-      return currentPathname
-    })
-    return breadcrumbs
-  }
-
-  const breadcrumbs = getBreadcrumbs(currentLocation)
 
   return (
     <CBreadcrumb className="my-0">
-      <CBreadcrumbItem href="/">Home</CBreadcrumbItem>
-      {breadcrumbs.map((breadcrumb, index) => {
-        return (
-          <CBreadcrumbItem
-            {...(breadcrumb.active ? { active: true } : { href: breadcrumb.pathname })}
-            key={index}
-          >
-            {breadcrumb.name}
-          </CBreadcrumbItem>
-        )
-      })}
-    </CBreadcrumb>
-  )
-}
+      <CBreadcrumbItem href="/">
+        <CIcon icon={cilHome} className="me-1" />
+        Home
+      </CBreadcrumbItem>
 
-export default React.memo(AppBreadcrumb)
+      {breadcrumbs.map((crumb, index) => (
+        <CBreadcrumbItem
+          key={crumb.pathname}
+          href={!crumb.active ? crumb.pathname : undefined}
+          active={crumb.active}
+        >
+          {crumb.name}
+        </CBreadcrumbItem>
+      ))}
+    </CBreadcrumb>
+  );
+};
+
+export default React.memo(AppBreadcrumb);

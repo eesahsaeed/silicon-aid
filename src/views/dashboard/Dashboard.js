@@ -1,347 +1,356 @@
-import React from 'react'
-import classNames from 'classnames'
-
+// src/pages/Dashboard.js
+import React, { useState, useEffect } from 'react';
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
   CCardHeader,
   CCol,
-  CProgress,
   CRow,
+  CWidgetStatsF,
+  CFormInput,
+  CAlert,
   CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
   CTableBody,
   CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CBadge,
+  CProgress,
+  CButton
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 import {
-  cilPeople,
-  cilUser,
-  cilUserFemale,
-  cilChartPie,
-  cilMedicalCross,
-  cilHospital,
-  cilBed,
   cilCalendar,
-  cilMoney,
-  cilCloudDownload,
-} from '@coreui/icons'
+  cilPeople,
+  cilClock,
+  cilChartPie,
+  cilHospital,
+  cilUser,
+  cilBell,
+} from '@coreui/icons';
 
-// Mock avatars (you can replace paths with your own or use placeholders)
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
+const Dashboard = ({ user }) => {
+  // Mock data - today's key metrics
+  const [kpiData] = useState({
+    appointmentsToday: 187,
+    checkedIn: 124,
+    waiting: 38,
+    noShowRate: 12.4,
+    bedOccupancy: 78,
+  });
 
-// You can keep WidgetsBrand / WidgetsDropdown / MainChart from original CoreUI if you have them
-// For simplicity, I've commented them out or replaced with static content here
-// import WidgetsBrand from '../widgets/WidgetsBrand'
-// import WidgetsDropdown from '../widgets/WidgetsDropdown'
-// import MainChart from './MainChart'
-
-const SiliconAidDashboard = () => {
-  // Mock data - Clinical & Administrative overview
-  const keyMetrics = [
-    { title: 'Inpatients', value: '187 Active', percent: 78, color: 'success' },
-    { title: 'Outpatients Today', value: '421 Visits', percent: 65, color: 'info' },
-    { title: 'Appointments', value: '89 Scheduled', percent: 92, color: 'warning' },
-    { title: 'Bed Occupancy', value: '76%', percent: 76, color: 'danger' },
-    { title: 'Revenue Today', value: '$48,320', percent: 82, color: 'primary' },
-  ]
-
-  // Mock weekly patient flow (like original progress groups)
-  const weeklyPatientFlow = [
-    { day: 'Monday', newPatients: 42, followUps: 118 },
-    { day: 'Tuesday', newPatients: 58, followUps: 134 },
-    { day: 'Wednesday', newPatients: 31, followUps: 97 },
-    { day: 'Thursday', newPatients: 67, followUps: 152 },
-    { day: 'Friday', newPatients: 49, followUps: 121 },
-    { day: 'Saturday', newPatients: 22, followUps: 68 },
-    { day: 'Sunday', newPatients: 12, followUps: 45 },
-  ]
-
-  // Gender distribution mock
-  const genderDistribution = [
-    { title: 'Male', icon: cilUser, percent: 54 },
-    { title: 'Female', icon: cilUserFemale, percent: 46 },
-  ]
-
-  // Mock recent patients / Master Patient Index simulation
-  const recentPatients = [
+  // Live check-in alerts (simulated incoming)
+  const [alerts, setAlerts] = useState([
     {
-      avatar: { src: avatar1, status: 'success' },
-      patient: {
-        name: 'Aisha Mohammed',
-        id: 'PID-48392',
-        registered: 'Feb 10, 2026',
-        status: 'Inpatient',
-      },
-      department: 'Cardiology',
-      lastVisit: 'Today',
-      alerts: 'Penicillin Allergy',
+      id: 1,
+      message: 'Aisha Mohammed (MRN-392481) checked in for 09:15 AM follow-up – Room 101',
+      time: '4 min ago',
+      color: 'success',
     },
     {
-      avatar: { src: avatar2, status: 'danger' },
-      patient: {
-        name: 'Chukwuma Eze',
-        id: 'PID-29104',
-        registered: 'Jan 15, 2026',
-        status: 'Outpatient',
-      },
-      department: 'Orthopedics',
-      lastVisit: '5 min ago',
-      alerts: 'Drug Interaction Warning',
+      id: 2,
+      message: 'Walk-in: Chinedu Eze (MRN-584920) – triage needed',
+      time: '11 min ago',
+      color: 'warning',
     },
     {
-      avatar: { src: avatar3, status: 'warning' },
-      patient: {
-        name: 'Fatima Yusuf',
-        id: 'PID-57681',
-        registered: 'Feb 1, 2026',
-        status: 'New',
-      },
-      department: 'Pediatrics',
-      lastVisit: '1 hour ago',
-      alerts: 'None',
+      id: 3,
+      message: 'Ngozi Okonkwo (MRN-129374) arrived early for 10:00 consultation',
+      time: '19 min ago',
+      color: 'info',
     },
     {
-      avatar: { src: avatar4, status: 'secondary' },
-      patient: {
-        name: 'Oluwaseun Adebayo',
-        id: 'PID-34912',
-        registered: 'Dec 20, 2025',
-        status: 'Follow-up',
-      },
-      department: 'General Medicine',
-      lastVisit: 'Yesterday',
-      alerts: 'High BP Monitoring',
+      id: 4,
+      message: 'Dr. Fatima running 12 minutes behind schedule',
+      time: '28 min ago',
+      color: 'danger',
+    },
+  ]);
+
+  // Today's appointments list with simulated wait time progression
+  const [todaysAppointments, setTodaysAppointments] = useState([
+    {
+      id: 1,
+      time: '09:15 AM',
+      patient: 'Aisha Mohammed',
+      mrn: 'MRN-392481',
+      type: 'Follow-up',
+      doctor: 'Dr. Fatima Okoye',
+      status: 'In Progress',
+      wait: '0 min',
+      color: 'success',
     },
     {
-      avatar: { src: avatar5, status: 'success' },
-      patient: {
-        name: 'Ngozi Okonkwo',
-        id: 'PID-12847',
-        registered: 'Feb 12, 2026',
-        status: 'Discharged',
-      },
-      department: 'OBGYN',
-      lastVisit: '2 days ago',
-      alerts: 'Postnatal Check',
+      id: 2,
+      time: '09:45 AM',
+      patient: 'Chinedu Eze',
+      mrn: 'MRN-584920',
+      type: 'New Patient',
+      doctor: 'Dr. Samuel Adebayo',
+      status: 'Waiting',
+      wait: '22 min',
+      color: 'warning',
     },
-  ]
+    {
+      id: 3,
+      time: '10:00 AM',
+      patient: 'Ngozi Okonkwo',
+      mrn: 'MRN-129374',
+      type: 'Consultation',
+      doctor: 'Dr. Ibrahim Yusuf',
+      status: 'Checked-In',
+      wait: 'In Room 4',
+      color: 'info',
+    },
+    {
+      id: 4,
+      time: '10:30 AM',
+      patient: 'Tunde Alabi',
+      mrn: 'MRN-763920',
+      type: 'Procedure',
+      doctor: 'Dr. Amina Bello',
+      status: 'Scheduled',
+      wait: '-',
+      color: 'secondary',
+    },
+    {
+      id: 5,
+      time: '11:00 AM',
+      patient: 'Fatima Hassan',
+      mrn: 'MRN-482910',
+      type: 'Telemedicine',
+      doctor: 'Dr. Zara Khan',
+      status: 'Waiting',
+      wait: '8 min',
+      color: 'primary',
+    },
+    {
+      id: 6,
+      time: '11:30 AM',
+      patient: 'Yusuf Ibrahim',
+      mrn: 'MRN-917364',
+      type: 'Follow-up',
+      doctor: 'Dr. Fatima Okoye',
+      status: 'Scheduled',
+      wait: '-',
+      color: 'secondary',
+    },
+  ]);
+
+  // Waitlist summary
+  const [waitlist, setWaitlist] = useState([
+    { patient: 'Kemi Adeyemi', reason: 'Cancellation in Cardiology', priority: 'High' },
+    { patient: 'Maryam Ali', reason: 'Preferred slot opened', priority: 'Medium' },
+    { patient: 'John Okoro', reason: 'Urgent walk-in replacement', priority: 'High' },
+  ]);
+
+  // Simulate real-time updates (wait time + new alerts)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Increase wait times for waiting patients
+      setTodaysAppointments((prev) =>
+        prev.map((appt) =>
+          appt.status === 'Waiting'
+            ? { ...appt, wait: `${(parseInt(appt.wait) || 0) + 2} min` }
+            : appt
+        )
+      );
+
+      // Occasionally add new alert (simulation of real arrivals)
+      if (Math.random() > 0.65) {
+        const newAlert = {
+          id: alerts.length + 1,
+          message: `New arrival: ${['Maryam Ali', 'Sani Musa', 'Grace Adebayo'][Math.floor(Math.random() * 3)]} checked in`,
+          time: 'Just now',
+          color: 'info',
+        };
+        setAlerts((prev) => [newAlert, ...prev.slice(0, 7)]); // keep latest 8
+      }
+    }, 12000); // update every 12 seconds
+
+    return () => clearInterval(interval);
+  }, [alerts.length]);
 
   return (
     <>
-      {/* You can uncomment WidgetsDropdown if you have it */}
-      {/* <WidgetsDropdown className="mb-4" /> */}
+      {/* KPI Widgets */}
+      <CRow className="mb-4">
+        <CCol xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="primary"
+            title="Today's Appointments"
+            value={kpiData.appointmentsToday}
+            icon={<CIcon icon={cilCalendar} height={24} />}
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="success"
+            title="Patients Checked-In"
+            value={kpiData.checkedIn}
+            icon={<CIcon icon={cilPeople} height={24} />}
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="warning"
+            title="Currently Waiting"
+            value={kpiData.waiting}
+            icon={<CIcon icon={cilClock} height={24} />}
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="mb-3"
+            color="danger"
+            title="No-Show Rate Today"
+            value={`${kpiData.noShowRate}%`}
+            icon={<CIcon icon={cilChartPie} height={24} />}
+          />
+        </CCol>
+      </CRow>
 
+      {/* Quick Search */}
       <CCard className="mb-4">
+        <CCardHeader>
+          <CIcon icon={cilUser} className="me-2" />
+          Quick Patient Search (MPI)
+        </CCardHeader>
         <CCardBody>
-          <CRow>
-            <CCol sm={5}>
-              <h4 className="card-title mb-0">SILICON AID Overview</h4>
-              <div className="small text-body-secondary">February 2026 Snapshot</div>
-            </CCol>
-            <CCol sm={7} className="d-none d-md-block text-end">
-              <CButton color="primary" className="me-2">
-                <CIcon icon={cilCloudDownload} /> Export Report
-              </CButton>
-              <CButtonGroup>
-                {['Today', 'Week', 'Month'].map((value) => (
-                  <CButton
-                    color="outline-secondary"
-                    key={value}
-                    className="mx-0"
-                    active={value === 'Week'}
-                  >
-                    {value}
-                  </CButton>
-                ))}
-              </CButtonGroup>
-            </CCol>
-          </CRow>
-
-          {/* Placeholder for chart – in real project replace with Recharts or Chart.js */}
-          <div className="my-4 text-center text-body-secondary">
-            [Main Chart: Patient Admissions, Bed Occupancy & Revenue Trend – Feb 2026]
-          </div>
+          <CFormInput
+            placeholder="Search by Name, MRN, Phone, National ID, DOB, Barcode..."
+            size="lg"
+          />
+          <small className="text-body-secondary mt-2 d-block">
+            Start typing to see matching patients (multi-parameter search simulated)
+          </small>
         </CCardBody>
+      </CCard>
 
-        <CCardFooter>
-          <CRow
-            xs={{ cols: 1, gutter: 4 }}
-            sm={{ cols: 2 }}
-            lg={{ cols: 3 }}
-            xl={{ cols: 5 }}
-            className="text-center"
-          >
-            {keyMetrics.map((item, index) => (
-              <CCol key={index}>
-                <div className="text-body-secondary">{item.title}</div>
-                <div className="fw-semibold">{item.value}</div>
-                <CProgress thin className="mt-2" color={item.color} value={item.percent} />
-              </CCol>
-            ))}
-          </CRow>
-        </CCardFooter>
+      {/* Live Check-in Alerts */}
+      <CCard className="mb-4">
+        <CCardHeader>
+          <CIcon icon={cilBell} className="me-2" />
+          Real-time Check-in & Alert Feed
+        </CCardHeader>
+        <CCardBody style={{ maxHeight: '320px', overflowY: 'auto' }}>
+          {alerts.length === 0 ? (
+            <div className="text-center text-body-secondary py-4">No recent activity</div>
+          ) : (
+            alerts.map((alert) => (
+              <CAlert
+                key={alert.id}
+                color={alert.color}
+                className="d-flex justify-content-between align-items-center mb-2"
+              >
+                <div>{alert.message}</div>
+                <small className="text-nowrap ms-3">{alert.time}</small>
+              </CAlert>
+            ))
+          )}
+        </CCardBody>
       </CCard>
 
       <CRow>
-        <CCol xs={12} md={6} xl={6}>
+        {/* Waitlist Summary */}
+        <CCol lg={6}>
           <CCard className="mb-4">
-            <CCardHeader>Patient Flow & Bed Management</CCardHeader>
+            <CCardHeader>Waitlist Summary (Cancellations / Preferred Slots)</CCardHeader>
             <CCardBody>
-              <CRow className="mb-4">
-                <CCol xs={6}>
-                  <div className="border-start border-start-4 border-start-info py-2 px-3">
-                    <div className="text-body-secondary small">Available Beds</div>
-                    <div className="fs-4 fw-semibold">47 / 250</div>
-                  </div>
-                </CCol>
-                <CCol xs={6}>
-                  <div className="border-start border-start-4 border-start-danger py-2 px-3">
-                    <div className="text-body-secondary small">Pending Discharges</div>
-                    <div className="fs-4 fw-semibold">19</div>
-                  </div>
-                </CCol>
-              </CRow>
-
-              <hr className="mt-0 mb-4" />
-
-              {weeklyPatientFlow.map((item, index) => (
-                <div className="progress-group mb-4" key={index}>
-                  <div className="progress-group-prepend">
-                    <span className="text-body-secondary small">{item.day}</span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress thin color="info" value={item.newPatients} />
-                    <CProgress thin color="danger" value={item.followUps} />
-                  </div>
-                  <div className="progress-group-text small text-end">
-                    {item.newPatients} new / {item.followUps} FU
-                  </div>
-                </div>
-              ))}
+              <CTable hover responsive small>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Patient</CTableHeaderCell>
+                    <CTableHeaderCell>Reason / Slot</CTableHeaderCell>
+                    <CTableHeaderCell>Priority</CTableHeaderCell>
+                    <CTableHeaderCell>Action</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {waitlist.map((item, index) => (
+                    <CTableRow key={index}>
+                      <CTableDataCell className="fw-semibold">{item.patient}</CTableDataCell>
+                      <CTableDataCell>{item.reason}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge
+                          color={item.priority === 'High' ? 'danger' : 'warning'}
+                          shape="rounded-pill"
+                        >
+                          {item.priority}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <CButton color="success" size="sm">Notify Patient</CButton>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))}
+                  {waitlist.length === 0 && (
+                    <CTableRow>
+                      <CTableDataCell colSpan={4} className="text-center py-3">
+                        No patients on waitlist
+                      </CTableDataCell>
+                    </CTableRow>
+                  )}
+                </CTableBody>
+              </CTable>
             </CCardBody>
           </CCard>
         </CCol>
 
-        <CCol xs={12} md={6} xl={6}>
+        {/* Today's Appointments Overview */}
+        <CCol lg={6}>
           <CCard className="mb-4">
-            <CCardHeader>Demographics & Alerts</CCardHeader>
+            <CCardHeader>Today's Appointments & Queue Status</CCardHeader>
             <CCardBody>
-              <CRow className="mb-4">
-                <CCol xs={6}>
-                  <div className="border-start border-start-4 border-start-warning py-2 px-3">
-                    <div className="text-body-secondary small">Active RPM Patients</div>
-                    <div className="fs-4 fw-semibold">63</div>
-                  </div>
-                </CCol>
-                <CCol xs={6}>
-                  <div className="border-start border-start-4 border-start-success py-2 px-3">
-                    <div className="text-body-secondary small">Critical Alerts</div>
-                    <div className="fs-4 fw-semibold">8</div>
-                  </div>
-                </CCol>
-              </CRow>
-
-              <hr className="mt-0 mb-4" />
-
-              {genderDistribution.map((item, index) => (
-                <div className="progress-group mb-4" key={index}>
-                  <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.icon} size="lg" />
-                    <span>{item.title}</span>
-                    <span className="ms-auto fw-semibold">{item.percent}%</span>
-                  </div>
-                  <CProgress thin color="warning" value={item.percent} />
-                </div>
-              ))}
-
-              <div className="mb-4"></div>
-
-              <div className="progress-group mb-3">
-                <div className="progress-group-header">
-                  <CIcon className="me-2" icon={cilMedicalCross} size="lg" />
-                  <span>Allergy / Interaction Alerts</span>
-                  <span className="ms-auto fw-semibold">24 (12%)</span>
-                </div>
-                <CProgress thin color="danger" value={12} />
-              </div>
+              <CTable align="middle" className="mb-0 border" hover responsive small>
+                <CTableHead className="text-nowrap">
+                  <CTableRow>
+                    <CTableHeaderCell>Time</CTableHeaderCell>
+                    <CTableHeaderCell>Patient</CTableHeaderCell>
+                    <CTableHeaderCell>MRN</CTableHeaderCell>
+                    <CTableHeaderCell>Type</CTableHeaderCell>
+                    <CTableHeaderCell>Doctor</CTableHeaderCell>
+                    <CTableHeaderCell>Status</CTableHeaderCell>
+                    <CTableHeaderCell>Wait / Location</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {todaysAppointments.map((appt) => (
+                    <CTableRow key={appt.id}>
+                      <CTableDataCell className="fw-semibold">{appt.time}</CTableDataCell>
+                      <CTableDataCell>{appt.patient}</CTableDataCell>
+                      <CTableDataCell>{appt.mrn}</CTableDataCell>
+                      <CTableDataCell>{appt.type}</CTableDataCell>
+                      <CTableDataCell>{appt.doctor}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color={appt.color} shape="rounded-pill">
+                          {appt.status}
+                        </CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>{appt.wait}</CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
 
-      <CCard className="mb-4">
-        <CCardHeader>Recent Patients – Master Patient Index (MPI) Preview</CCardHeader>
-        <CCardBody>
-          <CTable align="middle" className="mb-0 border" hover responsive>
-            <CTableHead className="text-nowrap">
-              <CTableRow>
-                <CTableHeaderCell className="bg-body-tertiary text-center">
-                  <CIcon icon={cilPeople} />
-                </CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary">Patient</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary text-center">
-                  Department
-                </CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary">Last Activity</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary text-center">
-                  Alerts
-                </CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>
-              {recentPatients.map((item, index) => (
-                <CTableRow key={index}>
-                  <CTableDataCell className="text-center">
-                    <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div className="fw-semibold">{item.patient.name}</div>
-                    <div className="small text-body-secondary">
-                      <span>{item.patient.status}</span> | ID: {item.patient.id} | Reg:{' '}
-                      {item.patient.registered}
-                    </div>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    <div className="fw-semibold">{item.department}</div>
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div className="small text-body-secondary">Last interaction</div>
-                    <div className="fw-semibold">{item.lastVisit}</div>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    {item.alerts.includes('None') ? (
-                      <span className="text-success small">None</span>
-                    ) : (
-                      <span className="text-danger small">{item.alerts}</span>
-                    )}
-                  </CTableDataCell>
-                </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
+      {/* Optional small footer stats */}
+      <CCard className="mb-4 border-top border-primary border-3">
+        <CCardBody className="text-center text-body-secondary">
+          <small>
+            Hospital Management Simulation • Abuja, Nigeria • February 24, 2026 • Logged in as {user?.name || 'Guest'}
+          </small>
         </CCardBody>
       </CCard>
-
-      <div className="text-center text-body-secondary mt-5">
-        <small>
-          SILICON AID Demo – Frontend Simulation Only<br />
-          Modules represented: EHR Overview, MPI, Bed Mgmt, Appointments, Basic Alerts, Revenue Snapshot
-        </small>
-      </div>
     </>
-  )
-}
+  );
+};
 
-export default SiliconAidDashboard
+export default Dashboard;

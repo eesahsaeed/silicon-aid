@@ -13,10 +13,7 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilStar,
-  cilCalendar,
-  cilUser,
-  cilMoney,
-  cilBed,
+  cilCalendar
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -33,40 +30,28 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Diagnostics',
-    to: '/patients-diagnostics',
-    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />
+    name: 'Patients Management',
+    to: '/patients-management',
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Appointments',
     to: '/appointments',
-    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Patient Portal',
-    to: '/patient-portal',
-    icon: <CIcon icon={cilUser} customClassName="nav-icon" />
+    name: 'Pharmacy',
+    to: '/pharmacy',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Bed Management',
-    to: '/bed-management',
-    icon: <CIcon icon={cilBed} customClassName="nav-icon" />
-  },
-  {
-    component: CNavItem,
-    name: 'Inventory',
-    to: '/inventory',
-    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />
-  },
-  {
-    component: CNavItem,
-    name: 'Billing',
-    to: '/billing',
-    icon: <CIcon icon={cilMoney} customClassName="nav-icon" />
-  },
+    name: 'Reports',
+    to: '/reports',
+    icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
+  }
   // {
   //   component: CNavTitle,
   //   name: 'Theme',
