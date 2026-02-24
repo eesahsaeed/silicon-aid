@@ -6,8 +6,8 @@ const NewPatient = React.lazy(() => import('./views/patients-management/NewPatie
 const PatientProfile = React.lazy(() => import('./views/patients-management/PatientProfile'))
 const Appointments = React.lazy(() => import('./views/appointments/Appointments'))
 const NewAppointment = React.lazy(() => import('./views/appointments/NewAppointment'))
-const Pharmacy = React.lazy(() => import('./views/Pharmacy/Pharmacy'))
-const NewPrescription = React.lazy(() => import('./views/Pharmacy/NewPrescription'))
+const Pharmacy = React.lazy(() => import('./views/pharmacy/Pharmacy'))
+const NewPrescription = React.lazy(() => import('./views/pharmacy/NewPrescription'))
 const Reports = React.lazy(() => import('./views/reports/Reports'))
 const Queue = React.lazy(() => import('./views/patients-management/Queue'))
 
