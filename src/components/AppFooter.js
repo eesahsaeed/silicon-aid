@@ -28,7 +28,7 @@ const AppFooter = () => {
             className="me-2 text-primary opacity-75"
           />
           <span>
-            Abuja Central Hospital © {currentYear}
+            Silicon Throne Nigeria Limited © {currentYear}
           </span>
         </div>
 
