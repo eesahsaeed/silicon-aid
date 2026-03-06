@@ -7,6 +7,7 @@ const PatientProfile = React.lazy(() => import('./views/patients-management/Pati
 const Appointments = React.lazy(() => import('./views/appointments/Appointments'))
 const NewAppointment = React.lazy(() => import('./views/appointments/NewAppointment'))
 const Pharmacy = React.lazy(() => import('./views/pharmacy/Pharmacy'))
+const Laboratory = React.lazy(() => import('./views/laboratory/Laboratory'))
 const NewPrescription = React.lazy(() => import('./views/pharmacy/NewPrescription'))
 const Reports = React.lazy(() => import('./views/reports/Reports'))
 const Queue = React.lazy(() => import('./views/patients-management/Queue'))
@@ -21,6 +22,7 @@ const routes = [
   { path: '/appointments', name: 'Appointments', element: Appointments },
   { path: '/new-appointment', name: 'New Appointment', element: NewAppointment },
   { path: '/pharmacy', name: 'Pharmacy', element: Pharmacy },
+  { path: '/laboratory', name: 'Laboratory', element: Laboratory },
   { path: '/new-prescription', name: 'New Prescription', element: NewPrescription },
   { path: '/reports', name: 'Reports', element: Reports },
   // { path: '/theme', name: 'Theme', element: Colors, exact: true },
